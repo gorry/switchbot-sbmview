@@ -1,0 +1,18 @@
+# ウェブサーバーの設定
+# host: 待ち受けアドレス ('127.0.0.1' はローカルのみ、'0.0.0.0' は外部許可)
+host = "127.0.0.1"
+# port: 待ち受けポート番号
+port = 56780
+
+# 除外設定
+# ここに列挙されたIDは、SwitchBot APIからのデータの取得を行いません。
+exclude_device_ids = [
+    "XXXXXXXXXXXX",
+]
+
+# 表示順序設定
+# ここに列挙されたIDは、メイン画面（ダッシュボード）に、この順番で表示されます。
+order_device_ids = [
+    "XXXXXXXXXXXX",
+    "YYYYYYYYYYYY",
+]

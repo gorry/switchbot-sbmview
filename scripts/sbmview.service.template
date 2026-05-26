@@ -1,0 +1,15 @@
+[Unit]
+Description=SwitchBot Meter View
+After=network.target
+
+[Service]
+# setup.sh によって {{INSTALL_DIR}} と {{USER}} が置換されます
+User={{USER}}
+WorkingDirectory={{INSTALL_DIR}}
+ExecStart={{INSTALL_DIR}}/venv/bin/python3 {{INSTALL_DIR}}/sbmview.py
+Restart=always
+StandardOutput=append:{{INSTALL_DIR}}/sbmview.log
+StandardError=append:{{INSTALL_DIR}}/sbmview.log
+
+[Install]
+WantedBy=multi-user.target

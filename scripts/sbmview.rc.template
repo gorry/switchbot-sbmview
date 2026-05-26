@@ -1,0 +1,29 @@
+#!/bin/sh
+# PROVIDE: sbmview
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+
+# FreeBSD rc.d script template for sbmview
+
+. /etc/rc.subr
+
+name="sbmview"
+rcvar="sbmview_enable"
+
+load_rc_config $name
+: ${sbmview_enable:="NO"}
+
+# インストールディレクトリと実行ユーザーの設定
+# setup.sh によって {{INSTALL_DIR}} と {{USER}} が置換されます
+install_dir="{{INSTALL_DIR}}"
+user="{{USER}}"
+
+command="/usr/sbin/daemon"
+procname="${install_dir}/venv/bin/python3"
+pidfile="${install_dir}/sbmview.pid"
+logfile="${install_dir}/sbmview.log"
+
+# daemonコマンドを使用してバックグラウンド実行
+command_args="-f -p ${pidfile} -o ${logfile} -u ${user} ${procname} ${install_dir}/sbmview.py"
+
+run_rc_command "$1"

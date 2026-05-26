@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ device_name }}（{{ device_id }}） - 詳細</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #1c1e21;
+            --text-sub: #606770;
+            --accent: #007bff;
+            --temp-color: #ff5722;
+            --humi-color: #2196f3;
+            --min-color: #2196f3;
+            --avg-color: #888;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 10px;
+        }
+        header {
+            max-width: 800px;
+            margin: 0 auto 15px;
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .back-btn {
+            background: #eee;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .scale-switch {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .scale-btn {
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .scale-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .chart-wrapper {
+            height: 300px;
+            position: relative;
+            background-color: #eee;
+            border-radius: 4px;
+        }
+        .summary {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-top">
+            <button class="back-btn" onclick="location.href='/'">戻る</button>
+            <h1 style="font-size: 1.2rem; margin: 0;">{{ device_name }}（{{ device_id }}）</h1>
+            <div style="font-size: 0.9rem;">{{ current_battery if current_battery is not none else '--' }}%</div>
+        </div>
+
+        <div class="controls">
+            <button id="prev-btn" onclick="moveDate(-1)"> < </button>
+            <input type="date" id="date-picker" value="{{ date[:4] }}-{{ date[4:6] }}-{{ date[6:8] }}" onchange="jumpDate(this.value)">
+            <button id="next-btn" onclick="moveDate(1)"> > </button>
+        </div>
+
+        <div class="scale-switch">
+            {% for s, label in [(1, '1日間'), (2, '3日間'), (3, '1週間'), (4, '1ヶ月'), (5, '3ヶ月'), (6, '1年')] %}
+            <button class="scale-btn {{ 'active' if scale == s else '' }}" onclick="changeScale({{ s }})">{{ label }}</button>
+            {% endfor %}
+        </div>
+
+        <div class="scale-switch">
+            {% for t, label in [(1, '当日のみ'), (2, '前期と比較'), (3, '前年と比較')] %}
+            <button class="scale-btn {{ 'active' if type_id == t else '' }}" onclick="changeType({{ t }})">{{ label }}</button>
+            {% endfor %}
+        </div>
+    </header>
+
+    <div class="container">
+        {% for card in cards %}
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    {% if scale > 1 %}
+                        {{ card.start_label }} ～ {{ card.end_label }}
+                    {% else %}
+                        {{ card.start_label }}
+                    {% endif %}
+                </div>
+                <div class="summary">
+                    <span>最小バッテリー量: {{ card.min_battery if card.min_battery is not none else '--' }}%</span>
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="chart-{{ loop.index }}"></canvas>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/detail.js') }}"></script>
+    <script>
+        initDetailCharts({
+            scale: {{ scale }},
+            currentDate: "{{ date }}",
+            minDate: "{{ min_date }}",
+            maxDate: "{{ max_date }}",
+            cardsData: {{ cards | tojson }},
+            orderIndex: {{ order_index }},
+            typeId: {{ type_id }}
+        });
+    </script>
+</body>
+</html>
