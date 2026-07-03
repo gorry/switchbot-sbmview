@@ -68,6 +68,9 @@ def init_db(db_path):
         )
     ''')
     
+    # 重複登録を防ぐためのユニークインデックス作成
+    cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_sensor_data_unique ON sensor_data (timestamp, device_id)")
+    
     # 日次集計データ用テーブル (グラフの長期表示を高速化するため)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS daily_averages (
@@ -175,9 +178,20 @@ def main():
 
         # 正常なデータ（湿度が 0 より大きい）場合のみ保存
         if temp is not None and humi is not None and humi > 0:
-            # 生データの挿入
+            # 生データの挿入 (衝突した場合は最新データで上書きし、タイムスタンプは10分単位に丸める)
             cursor.execute(
-                "INSERT INTO sensor_data (device_id, device_name, temperature, humidity, battery) VALUES (?, ?, ?, ?, ?)",
+                """
+                INSERT INTO sensor_data (timestamp, device_id, device_name, temperature, humidity, battery)
+                VALUES (
+                    strftime('%Y-%m-%d %H:', 'now', 'localtime') || printf('%02d:00', (cast(strftime('%M', 'now', 'localtime') as integer) / 10) * 10),
+                    ?, ?, ?, ?, ?
+                )
+                ON CONFLICT(timestamp, device_id) DO UPDATE SET
+                    device_name = excluded.device_name,
+                    temperature = excluded.temperature,
+                    humidity = excluded.humidity,
+                    battery = COALESCE(excluded.battery, sensor_data.battery)
+                """,
                 (device_id, device_name, temp, humi, batt)
             )
             

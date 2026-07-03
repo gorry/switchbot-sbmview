@@ -108,9 +108,17 @@ def import_csv(db_path, csv_path):
 
     print(f"Prepared {len(data_to_insert)} records. Inserting into DB...")
     
-    # データベースへの一括挿入 (INSERT OR IGNORE で重複を回避)
+    # データベースへの一括挿入 (衝突した場合はCSVの実データで上書き、バッテリーは既存値を優先)
     cursor.executemany(
-        "INSERT OR IGNORE INTO sensor_data (timestamp, device_id, device_name, temperature, humidity, battery) VALUES (?, ?, ?, ?, ?, ?)",
+        """
+        INSERT INTO sensor_data (timestamp, device_id, device_name, temperature, humidity, battery)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(timestamp, device_id) DO UPDATE SET
+            device_name = excluded.device_name,
+            temperature = excluded.temperature,
+            humidity = excluded.humidity,
+            battery = COALESCE(sensor_data.battery, excluded.battery)
+        """,
         data_to_insert
     )
     
