@@ -39,8 +39,10 @@ def main():
     load_dotenv()
 
     # 設定ファイルの読み込み
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    config_path = os.path.join(dir_path, "config.toml")
     try:
-        with open("config.toml", "rb") as f:
+        with open(config_path, "rb") as f:
             config = tomllib.load(f)
     except FileNotFoundError:
         config = {}

@@ -13,6 +13,7 @@ import calendar
 app = Flask(__name__)
 # データベースの絶対パスを取得
 DB_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "sbmview_data.db")
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.toml")
 
 def get_db_connection():
     """データベースへの接続を確立します。"""
@@ -26,7 +27,7 @@ def index():
     conn = get_db_connection()
     try:
         # 設定ファイルから表示順序を取得
-        with open("config.toml", "rb") as f:
+        with open(CONFIG_PATH, "rb") as f:
             config = tomllib.load(f)
             order_ids = config.get("order_device_ids", [])
     except Exception:
@@ -137,7 +138,7 @@ def detail():
     
     # 設定ファイルからデバイスIDを特定
     try:
-        with open("config.toml", "rb") as f:
+        with open(CONFIG_PATH, "rb") as f:
             config = tomllib.load(f)
             order_ids = config.get("order_device_ids", [])
     except Exception:
@@ -150,7 +151,7 @@ def detail():
 
     conn = get_db_connection()
     # デバイス名の取得
-    device = conn.execute('SELECT device_name FROM sensor_data WHERE device_id = ? LIMIT 1', (device_id,)).fetchone()
+    device = conn.execute('SELECT device_name FROM sensor_data WHERE device_id = ? ORDER BY timestamp DESC LIMIT 1', (device_id,)).fetchone()
     if not device:
         conn.close()
         return "Device not found in database", 404
@@ -267,7 +268,7 @@ def detail():
 if __name__ == '__main__':
     # config.toml からホストとポート番号を読み込む
     try:
-        with open("config.toml", "rb") as f:
+        with open(CONFIG_PATH, "rb") as f:
             config = tomllib.load(f)
             host = config.get("host", "127.0.0.1")
             port = config.get("port", 56780)
