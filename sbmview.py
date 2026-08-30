@@ -132,6 +132,11 @@ def detail():
     type_id = int(request.args.get('type', 1))
     if type_id not in range(1, 4): type_id = 1
     
+    try:
+        expanddetail = int(request.args.get('expanddetail', 0))
+    except (TypeError, ValueError):
+        expanddetail = 0
+    
     date_str = request.args.get('date')
     if not date_str:
         date_str = datetime.now().strftime('%Y%m%d')
@@ -262,7 +267,8 @@ def detail():
                            min_date=min_ts,
                            max_date=max_ts,
                            cards=cards,
-                           current_battery=current_battery)
+                           current_battery=current_battery,
+                           expanddetail=expanddetail)
 
 
 if __name__ == '__main__':

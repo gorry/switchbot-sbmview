@@ -8,7 +8,12 @@
  */
 
 function initDetailCharts(params) {
-    const { scale, currentDate, minDate, maxDate, cardsData, orderIndex, typeId } = params;
+    const { scale, currentDate, minDate, maxDate, cardsData, orderIndex, typeId, expanddetail } = params;
+
+    window.toggleExpandDetail = function() {
+        const newExpand = expanddetail === 1 ? 0 : 1;
+        location.href = `/detail?device=${orderIndex}&scale=${scale}&type=${typeId}&date=${currentDate}&expanddetail=${newExpand}`;
+    }
 
     /**
      * 現在のスケールに基づいてタイムラインを前後に移動します。
@@ -37,7 +42,7 @@ function initDetailCharts(params) {
      */
     window.jumpDate = function(val) {
         const dateStr = val.replace(/-/g, '');
-        location.href = `/detail?device=${orderIndex}&scale=${scale}&type=${typeId}&date=${dateStr}`;
+        location.href = `/detail?device=${orderIndex}&scale=${scale}&type=${typeId}&date=${dateStr}&expanddetail=${expanddetail}`;
     }
 
     /**
@@ -45,7 +50,7 @@ function initDetailCharts(params) {
      * @param {number} newScale - 切り替えるスケールID。
      */
     window.changeScale = function(newScale) {
-        location.href = `/detail?device=${orderIndex}&scale=${newScale}&type=${typeId}&date=${currentDate}`;
+        location.href = `/detail?device=${orderIndex}&scale=${newScale}&type=${typeId}&date=${currentDate}&expanddetail=${expanddetail}`;
     }
 
     /**
@@ -53,7 +58,7 @@ function initDetailCharts(params) {
      * @param {number} newType - 比較タイプID。
      */
     window.changeType = function(newType) {
-        location.href = `/detail?device=${orderIndex}&scale=${scale}&type=${newType}&date=${currentDate}`;
+        location.href = `/detail?device=${orderIndex}&scale=${scale}&type=${newType}&date=${currentDate}&expanddetail=${expanddetail}`;
     }
 
     /**
@@ -227,6 +232,22 @@ function initDetailCharts(params) {
         const absMinT = absMinTemp.length ? Math.min(...absMinTemp) : null;
         const absMaxHumi = humis.length ? Math.max(...humis) : null;
         const absMinHumi = humis.length ? Math.min(...humis) : null;
+
+        let yTempMin = -20, yTempMax = 40;
+        let yHumiMin = -50, yHumiMax = 100;
+        
+        if (expanddetail === 1) {
+            const tempMargin = (absMaxTemp !== null && absMinT !== null) ? ((absMaxTemp - absMinT) * 0.15 || 1) : 1;
+            const humiMargin = (absMaxHumi !== null && absMinHumi !== null) ? ((absMaxHumi - absMinHumi) * 0.15 || 5) : 5;
+            if (absMinT !== null && absMaxTemp !== null) {
+                yTempMin = absMinT - tempMargin;
+                yTempMax = absMaxTemp + tempMargin;
+            }
+            if (absMinHumi !== null && absMaxHumi !== null) {
+                yHumiMin = Math.max(0, absMinHumi - humiMargin);
+                yHumiMax = Math.min(100, absMaxHumi + humiMargin);
+            }
+        }
 
         new Chart(ctx, {
             type: 'line',
@@ -435,12 +456,12 @@ function initDetailCharts(params) {
                     },
                     'y-temp': {
                         position: 'right',
-                        min: -20, max: 40,
+                        min: yTempMin, max: yTempMax,
                         ticks: {
                             stepSize: 10,
                             font: { size: 10 },
                             color: '#ff5722',
-                            callback: (v) => v + '℃'
+                            callback: (v) => Number(v).toFixed(1) + '℃'
                         },
                         grid: {
                             // 0度線を強調表示
@@ -450,12 +471,12 @@ function initDetailCharts(params) {
                     },
                     'y-humi': {
                         position: 'left',
-                        min: -50, max: 100, // 0-100%を温度範囲に合わせるためのオフセット
+                        min: yHumiMin, max: yHumiMax, // 0-100%を温度範囲に合わせるためのオフセット
                         ticks: {
                             stepSize: 25,
                             font: { size: 10 },
                             color: '#2196f3',
-                            callback: (v) => v >= 0 ? v + '%' : ''
+                            callback: (v) => v >= 0 ? Math.round(v) + '%' : ''
                         },
                         grid: { display: false }
                     }

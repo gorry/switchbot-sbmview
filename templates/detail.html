@@ -108,6 +108,7 @@
             <button id="prev-btn" onclick="moveDate(-1)"> < </button>
             <input type="date" id="date-picker" value="{{ date[:4] }}-{{ date[4:6] }}-{{ date[6:8] }}" onchange="jumpDate(this.value)">
             <button id="next-btn" onclick="moveDate(1)"> > </button>
+            <button class="scale-btn {{ 'active' if expanddetail == 1 else '' }}" style="margin-left:10px;" onclick="toggleExpandDetail()">拡張</button>
         </div>
 
         <div class="scale-switch">
@@ -154,7 +155,8 @@
             maxDate: "{{ max_date }}",
             cardsData: {{ cards | tojson }},
             orderIndex: {{ order_index }},
-            typeId: {{ type_id }}
+            typeId: {{ type_id }},
+            expanddetail: {{ expanddetail }}
         });
     </script>
 </body>
