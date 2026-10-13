@@ -1,0 +1,30 @@
+{
+  "name": "SwitchBot Meter View",
+  "short_name": "sbmview",
+  "description": "SwitchBot 温湿度計データ閲覧 Web アプリケーション",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

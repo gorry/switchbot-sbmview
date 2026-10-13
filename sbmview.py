@@ -271,6 +271,19 @@ def detail():
                            expanddetail=expanddetail)
 
 
+@app.route('/sw.js')
+def service_worker():
+    """サービスワーカーをサイトのルートスコープで配信します。"""
+    response = app.send_static_file('sw.js')
+    response.headers['Service-Worker-Allowed'] = '/'
+    return response
+
+@app.route('/manifest.json')
+def manifest():
+    """Web App Manifest を配信します。"""
+    return app.send_static_file('manifest.json')
+
+
 if __name__ == '__main__':
     # config.toml からホストとポート番号を読み込む
     try:
